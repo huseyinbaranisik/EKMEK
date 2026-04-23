@@ -87,8 +87,3 @@ class EkmekArayuz:
 
 # Küresel arayüz objesi
 ekmek_gui = EkmekArayuz()
-
-def arayuz_thread_baslat():
-    t = threading.Thread(target=ekmek_gui.baslat, daemon=True)
-    t.start()
-    return ekmek_gui
