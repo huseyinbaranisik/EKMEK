@@ -1,0 +1,32 @@
+# Ekmek AI Asistan — Gerekli Python Paketleri
+# Kurulum: pip install -r gereksinimler.txt
+
+# ── Temel ────────────────────────────────────────────────────────────────────
+requests>=2.31.0          # HTTP istekleri (TDK API, SO API, GitHub API)
+
+# ── Belge İşleme ─────────────────────────────────────────────────────────────
+python-docx>=1.1.0        # Word belgesi (.docx) okuma/yazma
+
+# ── Ses Tanıma (STT) ─────────────────────────────────────────────────────────
+SpeechRecognition>=3.10.0 # Mikrofon + Google STT / Whisper
+pyaudio>=0.2.14           # SpeechRecognition'ın mikrofon arka ucu
+                          # Windows için: pip install pipwin && pipwin install pyaudio
+
+# ── Uyanma Kelimesi (Opsiyonel) ──────────────────────────────────────────────
+# pvporcupine>=3.0.0      # Picovoice Porcupine wake-word (API key gerekli)
+# openwakeword>=0.6.0     # Ücretsiz açık kaynak wake-word alternatifi
+
+# ── Web Scraping (Opsiyonel) ──────────────────────────────────────────────────
+beautifulsoup4>=4.12.0    # HTML ayrıştırma
+lxml>=5.0.0               # bs4 için hızlı parser
+
+# ── Sesli Yanıt (TTS) ────────────────────────────────────────────────────────
+pyttsx3>=2.90             # Metni sese çevirme (Jarvis tarzı konuşma)
+
+# ── Otomasyon ve Ekran Kontrolü ──────────────────────────────────────────────
+pyautogui>=0.9.54         # Fare ve klavye kontrolü (Retry butonuna basma)
+Pillow>=10.0.0            # Ekran görüntüsü işleme
+
+# ── Geliştirici Araçları ──────────────────────────────────────────────────────
+python-dotenv>=1.0.0      # .env dosyasından API anahtarı yükleme
+colorlog>=6.8.0           # Renkli terminal log çıktısı

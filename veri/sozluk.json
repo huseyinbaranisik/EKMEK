@@ -1,0 +1,25 @@
+{
+  "_aciklama": "Ekmek AI Asistan — Yerel Türkçe Kelime Sözlüğü (Örnek Veri). Gerçek kullanım için TDK'nın kelime listesiyle genişletin.",
+  "surum": "1.0",
+  "kelime_sayisi": 120,
+  "kelimeler": [
+    "adam", "adım", "ağaç", "akıl", "alan", "alem", "alın", "alış",
+    "anlam", "anne", "araba", "aşk", "ateş", "ay", "ayna", "baba",
+    "bahar", "bakış", "başarı", "belge", "bilgi", "bilim", "bilinç",
+    "boyut", "büyük", "can", "çalışma", "çevre", "dahil", "dil",
+    "doğa", "doğru", "dost", "dünya", "düşünce", "eğitim", "ekmek",
+    "el", "emek", "ev", "fizik", "geliştirme", "giriş", "görev",
+    "gün", "güç", "güzel", "haber", "halk", "hayat", "hesap",
+    "hız", "ışık", "iş", "içerik", "ilgi", "insan", "internet",
+    "iyi", "izin", "kadın", "kalkınma", "karar", "kavram", "kelime",
+    "kişi", "kod", "kontrol", "konu", "kurum", "küresel", "lütfen",
+    "makale", "mantık", "merak", "model", "müzik", "nesne", "niyet",
+    "nokta", "not", "olay", "oran", "ortam", "oyun", "özgür",
+    "plan", "program", "proje", "sağlık", "sanat", "sayı", "seçim",
+    "ses", "sistem", "sokak", "sorun", "süreç", "şehir", "şirket",
+    "tarih", "teknoloji", "temel", "toplum", "tutum", "uygulama",
+    "ülke", "üniversite", "verim", "veri", "yaratıcı", "yazılım",
+    "yeni", "yerel", "yol", "yön", "zaman", "zihin", "çözüm",
+    "özet", "sözlük", "doküman", "asistan", "akıllı", "hibrit"
+  ]
+}

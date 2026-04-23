@@ -1,0 +1,1 @@
+# cekirdek paketi
