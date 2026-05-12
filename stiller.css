@@ -1,0 +1,490 @@
+/**
+ * Ekmek AI Asistan - Stil Dosyası
+ * Uygulamanın modern ve şık görünümünü sağlayan CSS kuralları.
+ */
+
+:root {
+    --ana-renk: #8d6e63; /* Orta kahverengi */
+    --ikincil-renk: #d7ccc8; /* Açık bej-kahve */
+    --arka-plan-bej: #ede0d4; /* Koyu bej */
+    --metin-koyu: #3e2723; /* Koyu kahverengi metin */
+    --beyaz-kenarlik: #ffffff;
+    --golge: rgba(0, 0, 0, 0.1);
+    --chat-gelen: rgba(255, 255, 255, 0.7);
+    --chat-giden: var(--ana-renk);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: transparent;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 20px;
+}
+
+/* Ana Konteynır */
+.container {
+    width: 360px;
+    height: 540px;
+    background: var(--arka-plan-bej);
+    border-radius: 40px; 
+    border: 5px solid var(--beyaz-kenarlik);
+    box-shadow: 0 10px 40px var(--golge);
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    position: relative;
+    animation: asagiKay 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Chat modunda konteyner yüksekliği */
+.container.chat-aktif {
+    height: 580px;
+}
+
+/* Sürükleme Alanı */
+.drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    -webkit-app-region: drag;
+    cursor: move;
+    z-index: 100;
+    /* Buton tıklamalarını engellemez */
+    pointer-events: none;
+}
+
+/* Butonlar sürükleme katmanının üzerinde tıklanabilir olmalı */
+.mic-button,
+.mod-gecis-btn,
+.gonder-btn,
+.chat-input {
+    -webkit-app-region: no-drag;
+    pointer-events: all;
+}
+
+/* Kapat Butonu */
+.kapat-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    background: rgba(141, 110, 99, 0.12);
+    border: 1.5px solid rgba(141, 110, 99, 0.2);
+    border-radius: 50%;
+    color: var(--ana-renk);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 200;
+    -webkit-app-region: no-drag;
+}
+
+.kapat-btn:hover {
+    background: #e53935;
+    border-color: #e53935;
+    color: white;
+    transform: scale(1.1);
+}
+
+.kapat-btn:active {
+    transform: scale(0.95);
+}
+
+/* Başlık Bölümü */
+.header {
+    text-align: center;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    color: var(--ana-renk);
+    letter-spacing: 3px;
+    font-weight: 700;
+}
+
+#status-text {
+    font-size: 0.8rem;
+    color: var(--metin-koyu);
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+/* Mod Alanları (Mikrofon / Chat) */
+.mod-alani {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* ========================== MİKROFON MODU ========================== */
+
+/* Asistan Görsel Alanı */
+.assistant-ui {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Ses Dalgaları (Visualizer) */
+.visualizer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 60px;
+}
+
+.visualizer .bar {
+    width: 6px;
+    height: 20px;
+    background: var(--ana-renk);
+    border-radius: 10px;
+    transition: height 0.3s ease;
+}
+
+.visualizer.active .bar {
+    animation: dalgalanma 0.8s infinite ease-in-out;
+}
+
+.visualizer.active .bar:nth-child(2) { animation-delay: 0.1s; }
+.visualizer.active .bar:nth-child(3) { animation-delay: 0.2s; }
+.visualizer.active .bar:nth-child(4) { animation-delay: 0.3s; }
+.visualizer.active .bar:nth-child(5) { animation-delay: 0.4s; }
+
+/* Yanıt Alanı */
+.response-area {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--metin-koyu);
+    padding: 15px 20px;
+    line-height: 1.5;
+    min-height: 100px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: metinGelsin 0.5s ease-out;
+}
+
+@keyframes metinGelsin {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Kontrol Butonları */
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    flex-shrink: 0;
+}
+
+.mic-button {
+    width: 70px;
+    height: 70px;
+    background: var(--ana-renk);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(141, 110, 99, 0.4);
+    transition: all 0.3s ease;
+}
+
+.mic-button:hover {
+    transform: scale(1.1);
+    background: var(--metin-koyu);
+}
+
+.mic-button.recording {
+    background: #e53935;
+    animation: nabiz 1.5s infinite;
+}
+
+/* ========================== MOD GEÇİŞ BUTONU ========================== */
+.mod-gecis-btn {
+    background: rgba(141, 110, 99, 0.15);
+    border: 1.5px solid rgba(141, 110, 99, 0.3);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    color: var(--ana-renk);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.mod-gecis-btn:hover {
+    background: var(--ana-renk);
+    color: white;
+    transform: scale(1.12);
+    border-color: var(--ana-renk);
+}
+
+/* ========================== CHAT MODU ========================== */
+
+/* Chat gizleme/gösterme animasyonları */
+.chat-gizli {
+    display: none !important;
+}
+
+#mikrofon-modu.mod-cikiyor {
+    animation: modCik 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+#chat-modu.mod-giriyor {
+    display: flex !important;
+    animation: modGir 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#chat-modu.mod-cikiyor {
+    animation: modCikChat 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+#mikrofon-modu.mod-giriyor {
+    display: flex !important;
+    animation: modGirMik 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modCik {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.92) translateY(20px); }
+}
+
+@keyframes modGir {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modCikChat {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.92) translateY(20px); }
+}
+
+@keyframes modGirMik {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Chat listesi */
+.chat-listesi {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 2px 8px;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(141, 110, 99, 0.3) transparent;
+}
+
+.chat-listesi::-webkit-scrollbar {
+    width: 4px;
+}
+.chat-listesi::-webkit-scrollbar-track { background: transparent; }
+.chat-listesi::-webkit-scrollbar-thumb {
+    background: rgba(141, 110, 99, 0.3);
+    border-radius: 4px;
+}
+
+/* Karşılama mesajı */
+.chat-karsilama {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.chat-karsilama span {
+    background: var(--chat-gelen);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.6);
+    color: var(--metin-koyu);
+    padding: 10px 14px;
+    border-radius: 18px 18px 18px 4px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    max-width: 85%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Chat mesaj balonları */
+.chat-mesaj {
+    display: flex;
+    animation: balonGel 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes balonGel {
+    from { opacity: 0; transform: translateY(10px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chat-mesaj.kullanici {
+    justify-content: flex-end;
+}
+
+.chat-mesaj.asistan {
+    justify-content: flex-start;
+}
+
+.chat-balon {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    max-width: 85%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.chat-mesaj.kullanici .chat-balon {
+    background: var(--chat-giden);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+}
+
+.chat-mesaj.asistan .chat-balon {
+    background: var(--chat-gelen);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.6);
+    color: var(--metin-koyu);
+    border-radius: 18px 18px 18px 4px;
+}
+
+/* Yazıyor animasyonu */
+.chat-yaziyor .chat-balon {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 12px 18px;
+}
+
+.chat-yaziyor .nokta {
+    width: 7px;
+    height: 7px;
+    background: var(--ana-renk);
+    border-radius: 50%;
+    animation: noktaAtla 1.2s infinite ease-in-out;
+}
+.chat-yaziyor .nokta:nth-child(2) { animation-delay: 0.2s; }
+.chat-yaziyor .nokta:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes noktaAtla {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+    40%           { transform: scale(1.1); opacity: 1; }
+}
+
+/* Instagram tarzı mesaj giriş alanı */
+.chat-giris-alani {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 28px;
+    padding: 8px 8px 8px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    flex-shrink: 0;
+    margin-top: 8px;
+}
+
+.chat-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    color: var(--metin-koyu);
+    min-width: 0;
+}
+
+.chat-input::placeholder {
+    color: rgba(62, 39, 35, 0.4);
+}
+
+.gonder-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--ana-renk);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(141, 110, 99, 0.35);
+}
+
+.gonder-btn:hover {
+    background: var(--metin-koyu);
+    transform: scale(1.1);
+}
+
+.gonder-btn:active {
+    transform: scale(0.95);
+}
+
+/* Chat modunda mikrofona geçiş butonu */
+#mik-gec-btn {
+    align-self: center;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+
+/* ========================== ANİMASYONLAR ========================== */
+@keyframes asagiKay {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dalgalanma {
+    0%, 100% { height: 20px; }
+    50% { height: 60px; }
+}
+
+@keyframes nabiz {
+    0% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(229, 57, 53, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); }
+}

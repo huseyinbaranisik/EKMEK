@@ -1,0 +1,24 @@
+{
+  "name": "ekmek-ai-asistan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ana_surec.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.1.2",
+    "loudness": "^0.4.2",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "electron": "^41.3.0"
+  }
+}
