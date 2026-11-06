@@ -32,11 +32,11 @@ document.body.appendChild(overlay);
 async function baglantiKontrol() {
   try {
     const res = await fetch(`${API}/api/saglik`, { signal: AbortSignal.timeout(3000) });
-    if (res.ok) {
-      bagliMi = true;
-      baglantiDurumu.textContent = '✓ Bağlandı';
-      baglantiDurumu.classList.add('aktif');
-    }
+    // fetch HTTP 4xx/5xx'te throw etmez; catch'e düşsün diye elle fırlat
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    bagliMi = true;
+    baglantiDurumu.textContent = '✓ Bağlandı';
+    baglantiDurumu.classList.add('aktif');
   } catch {
     bagliMi = false;
     baglantiDurumu.textContent = 'Bağlanamadı';

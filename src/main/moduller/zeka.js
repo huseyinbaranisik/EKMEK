@@ -28,9 +28,13 @@ TEKNİK KURALLAR:
 2. YouTube/Web -> "action": "open", "target": "URL"
 3. Sistem ayarları -> "action": "system"
 4. Mod değiştirme -> "action": "mode", "target": "oyun" | "gece"
+5. Makro/Protokol Çalıştırma: Kullanıcı "yazılım modunu başlat", "çalışma ortamımı hazırla" veya "yazılıma başla" gibi işlemler istediğinde -> "action": "macro", "target": "yazilim"
+6. Ekran İnceleme: SADECE kullanıcı AÇIKÇA "ekranıma göz at", "ekranımı incele", "ekranıma bak" gibi ifadeler kullandığında -> "action": "vision", "target": "screen"
+7. +18 KISITLAMASI: Eğer kullanıcı cinsel içerikli (porno vb.), yasadışı veya ahlaka aykırı bir talepte bulunursa KESİNLİKLE reddet. "action": "unknown" dön ve yanıt olarak: "Üzgünüm efendim, ancak bu tür içeriklere erişmenize veya işlem yapmanıza izin veremem." de.
+8. Fare Tıklaması: Eğer önceki mesajlarda asistan "[KOORDINAT: X, Y]" formatında bir yeri tıklamak için izin istemişse ve kullanıcı "evet", "tıkla", "onaylıyorum" dediyse -> "action": "click", "target": "mouse", "value": {"x": <X değeri>, "y": <Y değeri>}
 
 Yanıtlarını HER ZAMAN geçerli bir JSON formatında döndür:
-{ "action": "open" | "system" | "mode" | "unknown", "target": "string", "value": "any", "response": "Efendim hitabını içeren samimi yanıt" }`;
+{ "action": "open" | "system" | "mode" | "macro" | "vision" | "click" | "unknown", "target": "string", "value": "any", "response": "Efendim hitabını içeren samimi yanıt" }`;
 
 /**
  * Sohbet geçmişini alıp AI yanıtı döndürür.
@@ -122,4 +126,31 @@ async function sesiMetneCevir(arrayBuffer) {
     }
 }
 
-module.exports = { komutuYorumla, sesiMetneCevir };
+/**
+ * Ekran görüntüsünü ve soruyu Groq Vision API ile yorumlar.
+ */
+async function ekraniYorumla(base64Image, soru) {
+    try {
+        const tamamlama = await groq.chat.completions.create({
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: "Şu anda kullanıcının ekranında bir sorun var. Kullanıcı diyor ki: '" + soru + "'. Ekran görüntüsünü incele ve ne yapılması gerektiğini adım adım, nazik ve samimi bir dille (mutlaka 'efendim' diyerek) anlat. Eğer sorun çözülebilir bir şeyse ve tıklanması gereken belirli bir buton/yer tespit edersen, yanıtında mutlaka tıklanacak yerin koordinatlarını '[KOORDINAT: X, Y]' formatında ver. Fare kontrolü istiyorsan 'Şu noktaya tıklamam için izin veriyor musunuz efendim?' gibi bir cümleyle bitir." },
+                        { type: "image_url", image_url: { url: `data:image/png;base64,${base64Image}` } }
+                    ]
+                }
+            ],
+            model: "llama-3.2-90b-vision-preview",
+            temperature: 0.5,
+            max_tokens: 1024,
+        });
+
+        return tamamlama.choices[0]?.message?.content || "Ekranı incelerken bir sorun oluştu efendim.";
+    } catch (hata) {
+        console.error('Groq Vision Hatası:', hata.message);
+        return "Ekran görüntünüzü incelerken bağlantı sorunu yaşadım efendim.";
+    }
+}
+
+module.exports = { komutuYorumla, sesiMetneCevir, ekraniYorumla };

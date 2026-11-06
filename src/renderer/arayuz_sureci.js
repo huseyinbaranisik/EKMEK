@@ -67,6 +67,21 @@ function arayuzuHazirla() {
         konus("Size nasıl yardımcı olabilirim efendim?");
         window.speechSynthesis.onvoiceschanged = null; // Bir kez çalıştır
     };
+
+    // Gözlemci veya uzak kontrol uyarılarını dinle
+    if (window.electronAPI && window.electronAPI.uzakKomutDinle) {
+        window.electronAPI.uzakKomutDinle((veri) => {
+            if (veri.tip === 'sesli_uyari') {
+                sohbetGecmisi.push({ role: "assistant", content: veri.mesaj });
+                chataBalonEkle('asistan', veri.mesaj);
+                yanitMetni.innerText = veri.mesaj;
+                konus(veri.mesaj);
+            }
+        });
+    }
+
+    // İlk açılışta pencere görünürse wake-word dinlemeyi başlat
+    if (document.visibilityState === 'visible') wakeWordBaslat();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -150,6 +165,25 @@ async function mesajGonder() {
             await window.electronAPI.uygulamayiBaslat(sonuc.target);
         } else if (sonuc.action === 'system') {
             await window.electronAPI.sistemKontrolu({ tip: sonuc.target, deger: sonuc.value });
+        } else if (sonuc.action === 'macro') {
+            await window.electronAPI.makroyuCalistir(sonuc.target);
+        } else if (sonuc.action === 'vision') {
+            const yaziyorId2 = yaziyorGoster();
+            try {
+                const visionYanit = await window.electronAPI.ekraniIncele(metin);
+                yaziyorKaldir(yaziyorId2);
+                chataBalonEkle('asistan', visionYanit);
+                sohbetGecmisi.push({ role: "assistant", content: visionYanit });
+                konus(visionYanit);
+            } catch (vHata) {
+                yaziyorKaldir(yaziyorId2);
+                const hataMesaji = "Ekranınızı incelerken bir sorun oluştu efendim.";
+                chataBalonEkle('asistan', hataMesaji);
+                sohbetGecmisi.push({ role: "assistant", content: hataMesaji });
+                konus(hataMesaji);
+            }
+        } else if (sonuc.action === 'click') {
+            await window.electronAPI.fareyeTikla(sonuc.value);
         }
 
     } catch (hata) {
@@ -205,6 +239,9 @@ function yaziyorKaldir(id) {
 
 async function kaydiBaslat() {
     if (kayitDevamEdiyor) return;
+    
+    // Ses çakışmasını önlemek için wake-word'ü durdur
+    wakeWordDurdur();
 
     try {
         kayitDevamEdiyor = true;
@@ -240,6 +277,7 @@ async function kaydiBaslat() {
                 durumMetni.innerText = "Hazır";
                 mikrofonButonu.disabled  = false;
                 kayitDevamEdiyor = false;
+                if (document.visibilityState === 'visible') wakeWordBaslat();
             }
         };
 
@@ -263,10 +301,13 @@ function kaydiDurdur() {
         mikrofonButonu.classList.remove('recording');
         mikrofonButonu.disabled = true;
     }
+    // Elle durdurulursa tekrar bekleme moduna geç
+    if (document.visibilityState === 'visible') wakeWordBaslat();
 }
 
 async function komutuIsle(metin) {
     sohbetGecmisi.push({ role: "user", content: metin });
+    chataBalonEkle('kullanici', metin);
     if (sohbetGecmisi.length > 20) sohbetGecmisi.shift();
 
     try {
@@ -274,6 +315,7 @@ async function komutuIsle(metin) {
 
         yanitMetni.innerText = sonuc.response;
         sohbetGecmisi.push({ role: "assistant", content: sonuc.response });
+        chataBalonEkle('asistan', sonuc.response);
 
         konus(sonuc.response);
 
@@ -281,6 +323,27 @@ async function komutuIsle(metin) {
             await window.electronAPI.uygulamayiBaslat(sonuc.target);
         } else if (sonuc.action === 'system') {
             await window.electronAPI.sistemKontrolu({ tip: sonuc.target, deger: sonuc.value });
+        } else if (sonuc.action === 'macro') {
+            await window.electronAPI.makroyuCalistir(sonuc.target);
+        } else if (sonuc.action === 'vision') {
+            const yaziyorId2 = yaziyorGoster();
+            try {
+                const visionYanit = await window.electronAPI.ekraniIncele(metin);
+                yaziyorKaldir(yaziyorId2);
+                chataBalonEkle('asistan', visionYanit);
+                sohbetGecmisi.push({ role: "assistant", content: visionYanit });
+                yanitMetni.innerText = visionYanit;
+                konus(visionYanit);
+            } catch (vHata) {
+                yaziyorKaldir(yaziyorId2);
+                const hataMesaji = "Ekranınızı incelerken bir sorun oluştu efendim.";
+                chataBalonEkle('asistan', hataMesaji);
+                sohbetGecmisi.push({ role: "assistant", content: hataMesaji });
+                yanitMetni.innerText = hataMesaji;
+                konus(hataMesaji);
+            }
+        } else if (sonuc.action === 'click') {
+            await window.electronAPI.fareyeTikla(sonuc.value);
         }
 
         durumMetni.innerText = "Hazır";
@@ -291,6 +354,7 @@ async function komutuIsle(metin) {
     } finally {
         mikrofonButonu.disabled = false;
         kayitDevamEdiyor = false;
+        if (document.visibilityState === 'visible') wakeWordBaslat();
     }
 }
 
@@ -299,16 +363,75 @@ async function komutuIsle(metin) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function konus(metin) {
-    window.speechSynthesis.cancel();
+    if (window.electronAPI && window.electronAPI.sesliYanit) {
+        window.electronAPI.sesliYanit(metin);
+    } else {
+        window.speechSynthesis.cancel();
 
-    const ses = new SpeechSynthesisUtterance(metin);
-    ses.lang  = 'tr-TR';
-    ses.rate  = 1.1;
-    ses.pitch = 1.0;
+        const ses = new SpeechSynthesisUtterance(metin);
+        ses.lang  = 'tr-TR';
+        ses.rate  = 1.1;
+        ses.pitch = 1.0;
 
-    const sesler     = window.speechSynthesis.getVoices();
-    const turkceSes  = sesler.find(s => s.lang.startsWith('tr'));
-    if (turkceSes) ses.voice = turkceSes;
+        const sesler     = window.speechSynthesis.getVoices();
+        const turkceSes  = sesler.find(s => s.lang.startsWith('tr'));
+        if (turkceSes) ses.voice = turkceSes;
 
-    window.speechSynthesis.speak(ses);
+        window.speechSynthesis.speak(ses);
+    }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  WAKE WORD (SÜREKLİ DİNLEME)
+// ═══════════════════════════════════════════════════════════════════════════
+
+let wakeWordAlici = null;
+
+function wakeWordBaslat() {
+    if (!window.webkitSpeechRecognition || kayitDevamEdiyor) return;
+    
+    if (wakeWordAlici) {
+        try { wakeWordAlici.stop(); } catch(e){}
+    }
+
+    wakeWordAlici = new webkitSpeechRecognition();
+    wakeWordAlici.continuous = true;
+    wakeWordAlici.interimResults = false;
+    wakeWordAlici.lang = 'tr-TR';
+
+    wakeWordAlici.onresult = (event) => {
+        if (kayitDevamEdiyor) return;
+        const sonucIndex = event.resultIndex;
+        const metin = event.results[sonucIndex][0].transcript.toLowerCase().trim();
+
+        if (metin.includes('ekmek')) {
+            if (chatModu) mikrofonModunaGec();
+            kaydiBaslat();
+        }
+    };
+
+    wakeWordAlici.onend = () => {
+        if (document.visibilityState === 'visible' && !kayitDevamEdiyor) {
+            try { wakeWordAlici.start(); } catch(e){}
+        }
+    };
+
+    try {
+        wakeWordAlici.start();
+    } catch(e) { console.error("WakeWord hatası", e); }
+}
+
+function wakeWordDurdur() {
+    if (wakeWordAlici) {
+        wakeWordAlici.onend = null;
+        try { wakeWordAlici.stop(); } catch(e){}
+    }
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        if (!kayitDevamEdiyor) wakeWordBaslat();
+    } else {
+        wakeWordDurdur();
+    }
+});

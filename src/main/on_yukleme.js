@@ -9,14 +9,26 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Uygulama başlatma komutu
   uygulamayiBaslat: (hedef) => ipcRenderer.invoke('uygulamayi-baslat', hedef),
 
+  // Makro başlatma
+  makroyuCalistir: (hedef) => ipcRenderer.invoke('makroyu-calistir', hedef),
+
   // Sistem kontrolleri (ses, parlaklık vb.)
   sistemKontrolu: (veri) => ipcRenderer.invoke('sistem-kontrolu', veri),
 
   // Groq üzerinden komut yorumlama
   komutuYorumla: (gecmis) => ipcRenderer.invoke('komutu-yorumla', gecmis),
 
+  // Edge-TTS ile sesli yanıt (Daha insancıl ses)
+  sesliYanit: (metin) => ipcRenderer.invoke('sesli-yanit', metin),
+
   // Ses verisini metne çevirme (Whisper)
   sesiMetneCevir: (sesVerisi) => ipcRenderer.invoke('sesi-metne-cevir', sesVerisi),
+
+  // Ekranı incele ve analiz et
+  ekraniIncele: (soru) => ipcRenderer.invoke('ekrani-incele', soru),
+
+  // Fareye tıkla
+  fareyeTikla: (koordinat) => ipcRenderer.invoke('fareye-tikla', koordinat),
 
   // Pencereyi gizle (tray'e minimize et)
   pencereyiKapat: () => ipcRenderer.invoke('pencereyi-kapat'),

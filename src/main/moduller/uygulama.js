@@ -22,7 +22,8 @@ const spotifyEslesmeleri = {
     'beğenilen şarkılar': 'spotify:collection:tracks',
     'en sevdiğim': 'spotify:collection:tracks',
     'en sevdiğim şarkılar': 'spotify:collection:tracks',
-    'favorilerim': 'spotify:collection:tracks'
+    'favorilerim': 'spotify:collection:tracks',
+    'spotify': 'spotify:'
 };
 
 async function uygulamayiBaslat(hedef) {
@@ -44,6 +45,7 @@ async function uygulamayiBaslat(hedef) {
 
     if (hedefKucuk.startsWith('spotify search:')) {
         const sorgu = hedef.substring(15).trim();
+        
         exec(`start spotify:search:${encodeURIComponent(sorgu)}`);
         
         setTimeout(() => {
@@ -55,6 +57,14 @@ async function uygulamayiBaslat(hedef) {
 
     // Web URL Kontrolü (http veya https ile başlıyorsa)
     if (hedefKucuk.startsWith('http://') || hedefKucuk.startsWith('https://')) {
+        if (hedefKucuk.includes('instagram.com')) {
+            exec(`start instagram://`);
+            return { success: true, message: `Instagram uygulaması açılıyor efendim.` };
+        }
+        if (hedefKucuk.includes('spotify.com')) {
+            exec(`start spotify:`);
+            return { success: true, message: `Spotify uygulaması açılıyor efendim.` };
+        }
         shell.openExternal(hedef);
         return { success: true, message: `Web adresi açılıyor.` };
     }
@@ -95,4 +105,20 @@ async function uygulamayiBaslat(hedef) {
     return { success: true, message: `${hedef} açılıyor efendim.` };
 }
 
-module.exports = { uygulamayiBaslat };
+async function makroCalistir(hedef) {
+    let hedefKucuk = (hedef || '').toLowerCase().trim();
+    
+    if (hedefKucuk === 'yazilim') {
+        // Antigravity'i aç
+        exec(`start "" "C:\\Users\\win\\AppData\\Local\\Programs\\Antigravity\\Antigravity.exe"`);
+        
+        // Spotify'ı aç
+        exec(`start spotify:`);
+
+        return { success: true, message: `Yazılım protokolünüz başlatıldı efendim. Antigravity ve Spotify açılıyor.` };
+    }
+
+    return { success: false, message: `Bilinmeyen makro: ${hedef}` };
+}
+
+module.exports = { uygulamayiBaslat, makroCalistir };
