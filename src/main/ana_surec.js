@@ -12,7 +12,7 @@ require('dotenv').config();
 let anaPencere;
 let tray;
 
-const SOZLUK_YOLU = path.join(__dirname, 'veri', 'sozluk.json');
+const SOZLUK_YOLU = path.join(__dirname, '../../veri', 'sozluk.json');
 
 function pencereOlustur() {
     const anaEkran = screen.getPrimaryDisplay();
@@ -27,7 +27,7 @@ function pencereOlustur() {
         transparent: true,
         alwaysOnTop: true,
         show: false,
-        icon: path.join(__dirname, 'icon.png'),
+        icon: path.join(__dirname, '../../assets/icon.png'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -35,7 +35,7 @@ function pencereOlustur() {
         }
     });
 
-    anaPencere.loadFile('index.html');
+    anaPencere.loadFile(path.join(__dirname, '../renderer/index.html'));
 
     anaPencere.once('ready-to-show', () => {
         anaPencere.show();
@@ -58,7 +58,7 @@ function pencereOlustur() {
  * System Tray oluşturur — sağ tık menüsü ile kontrol.
  */
 function trayOlustur() {
-    const ikonYolu = path.join(__dirname, 'icon.png');
+    const ikonYolu = path.join(__dirname, '../../assets/icon.png');
     const ikonGorsel = nativeImage.createFromPath(ikonYolu).resize({ width: 16, height: 16 });
 
     tray = new Tray(ikonGorsel);
@@ -111,6 +111,10 @@ app.whenReady().then(() => {
     const { sunucuyuBaslat } = require('./moduller/uzak_kontrol');
     sunucuyuBaslat(anaPencere);
 
+    // Gözlemciyi başlat (Pil, RAM, CPU uyarıları)
+    const { gozlemciyiBaslat } = require('./moduller/gozlemci');
+    gozlemciyiBaslat(anaPencere);
+
     // Medya ve mikrofon izinlerini otomatik onayla
     const { session } = require('electron');
     session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
@@ -128,6 +132,9 @@ app.on('before-quit', () => {
     app.isQuiting = true;
     const { sunucuyuDurdur } = require('./moduller/uzak_kontrol');
     sunucuyuDurdur();
+
+    const { gozlemciyiDurdur } = require('./moduller/gozlemci');
+    gozlemciyiDurdur();
 });
 
 // ===================== IPC İletişimi =====================
@@ -135,6 +142,11 @@ app.on('before-quit', () => {
 ipcMain.handle('uygulamayi-baslat', async (event, hedef) => {
     const { uygulamayiBaslat } = require('./moduller/uygulama');
     return await uygulamayiBaslat(hedef);
+});
+
+ipcMain.handle('makroyu-calistir', async (event, hedef) => {
+    const { makroCalistir } = require('./moduller/uygulama');
+    return await makroCalistir(hedef);
 });
 
 ipcMain.handle('sistem-kontrolu', async (event, veri) => {
@@ -147,9 +159,60 @@ ipcMain.handle('komutu-yorumla', async (event, gecmis) => {
     return await komutuYorumla(gecmis);
 });
 
+ipcMain.handle('sesli-yanit', async (event, metin) => {
+    const { exec } = require('child_process');
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    // Güvenlik ve hata önleme için metindeki çift tırnakları kaçış karakteriyle değiştiriyoruz
+    const scriptPath = path.join(__dirname, '../python/cekirdek/sesli_yanit.py');
+    const pythonPath = path.join(__dirname, '../python');
+    exec(`chcp 65001 > nul && ${pythonCmd} "${scriptPath}" "${metin.replace(/"/g, '\\"')}"`, { env: { ...process.env, PYTHONPATH: pythonPath } });
+    return true;
+});
+
 ipcMain.handle('sesi-metne-cevir', async (event, sesVerisi) => {
     const { sesiMetneCevir } = require('./moduller/zeka');
     return await sesiMetneCevir(sesVerisi);
+});
+
+ipcMain.handle('ekrani-incele', async (event, soru) => {
+    if (anaPencere) anaPencere.hide();
+    
+    // Pencerenin tamamen gizlenmesi için kısa bir süre bekle
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    const screenshot = require('screenshot-desktop');
+    try {
+        const imgBuffer = await screenshot();
+        const base64Image = imgBuffer.toString('base64');
+        
+        const { ekraniYorumla } = require('./moduller/zeka');
+        const yanit = await ekraniYorumla(base64Image, soru);
+        
+        if (anaPencere) anaPencere.show();
+        return yanit;
+    } catch (e) {
+        if (anaPencere) anaPencere.show();
+        console.error("Ekran görüntüsü alınırken hata:", e);
+        throw e;
+    }
+});
+
+ipcMain.handle('fareye-tikla', async (event, koordinat) => {
+    const { exec } = require('child_process');
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    const scriptPath = path.join(__dirname, '../python/moduller/otomasyon/fare_kontrol.py');
+    const pythonPath = path.join(__dirname, '../python');
+    
+    return new Promise((resolve, reject) => {
+        exec(`${pythonCmd} "${scriptPath}" ${koordinat.x} ${koordinat.y}`, { env: { ...process.env, PYTHONPATH: pythonPath } }, (error, stdout, stderr) => {
+            if (error) {
+                console.error("Fare tıklama hatası:", error);
+                reject(error);
+            } else {
+                resolve(true);
+            }
+        });
+    });
 });
 
 ipcMain.handle('pencereyi-kapat', () => {
